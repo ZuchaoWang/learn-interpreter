@@ -72,6 +72,19 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   }
 
   @Override
+  public String visitClassStmt(Stmt.Class stmt) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("(class " + stmt.name.lexeme);
+
+    for (Stmt.Function method : stmt.methods) {
+      builder.append(" " + print(method));
+    }
+
+    builder.append(")");
+    return builder.toString();
+  }
+
+  @Override
   public String visitExpressionStmt(Expression stmt) {
     return parenthesize(";", stmt.expression);
   }
@@ -128,6 +141,22 @@ class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   @Override
   public String visitWhileStmt(While stmt) {
     return parenthesize2("while", stmt.condition, stmt.body);
+  }
+
+  @Override
+  public String visitGetExpr(Expr.Get expr) {
+    return parenthesize2(".", expr.object, expr.name.lexeme);
+  }
+
+  @Override
+  public String visitSetExpr(Expr.Set expr) {
+    return parenthesize2("=",
+        expr.object, expr.name.lexeme, expr.value);
+  }
+
+  @Override
+  public String visitThisExpr(Expr.This expr) {
+    return "this";
   }
 
   private String parenthesize(String name, Expr... exprs) {

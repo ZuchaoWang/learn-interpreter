@@ -36,6 +36,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }                                    
   }   
 
+  Map<Expr, Integer> getLocals() {
+    return locals;
+  }
+
 	@Override                                              
   public Void visitExpressionStmt(Stmt.Expression stmt) {
     evaluate(stmt.expression);                           

@@ -6,7 +6,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;                             
 import java.nio.file.Files;                                  
 import java.nio.file.Paths;                                  
-import java.util.List;                                       
+import java.util.List;     
+import java.util.Map;                                  
 
 public class Lox {
   private static final Interpreter interpreter = new Interpreter();
@@ -51,9 +52,21 @@ public class Lox {
 
     // Stop if there was a syntax error.                   
     if (hadError) return;
+
+    System.out.println("===== Parser results ===== ");
+    AstPrinter printer = new AstPrinter();
+    for (Stmt statement : statements) {
+      System.out.println(printer.print(statement));
+    }
     
     Resolver resolver = new Resolver(interpreter);
     resolver.resolve(statements); 
+
+    System.out.println("===== Resolver results ===== ");
+    Map<Expr, Integer> locals = interpreter.getLocals();
+    for (Expr expression: locals.keySet()) {
+      System.out.println(locals.get(expression) + " : " + printer.print(expression));
+    }
 
     // Stop if there was a resolution error.
     if (hadError) return;  

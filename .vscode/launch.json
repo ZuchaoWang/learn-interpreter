@@ -10,7 +10,7 @@
       "request": "launch",
       "mainClass": "com.craftinginterpreters.lox.Lox",
       "projectName": "learn-interpreter_f3210d28",
-      "args": "../test/while.txt",
+      "args": "../test/fun1.txt",
       "cwd": "${workspaceFolder}/java"
     },
     {

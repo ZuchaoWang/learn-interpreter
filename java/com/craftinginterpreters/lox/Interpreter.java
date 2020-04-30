@@ -332,7 +332,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       for (Stmt statement : statements) {                            
         execute(statement);                                          
       }                                                              
-    } finally {                                                      
+    } finally {
+      // import for return, break, continue                                                      
       this.environment = previous;                                   
     }                                                                
   }  

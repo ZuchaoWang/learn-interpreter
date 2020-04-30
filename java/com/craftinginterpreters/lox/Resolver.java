@@ -104,7 +104,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   }
 
   @Override                                                     
-  public Void visitVariableExpr(Expr.Variable expr) {           
+  public Void visitVariableExpr(Expr.Variable expr) {      
+    // this does not handle "var a = a;" in global scope
+    // will lead to runtime error      
     if (!scopes.isEmpty() &&                                    
         scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) { 
       Lox.error(expr.name,                                      
@@ -263,7 +265,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     scopes.pop();          
   }
 
-  private void declare(Token name) {           
+  private void declare(Token name) {
+    // when scopes.isEmpty(), we are in global scope
+    // no need to resolve for variables, so directly return       
     if (scopes.isEmpty()) return;
 
     Map<String, Boolean> scope = scopes.peek();

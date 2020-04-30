@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug (Launch)-Lox<learn-interpreter_f3210d28>",
+      "request": "launch",
+      "mainClass": "com.craftinginterpreters.lox.Lox",
+      "projectName": "learn-interpreter_f3210d28",
+      "args": "../test/while.txt",
+      "cwd": "${workspaceFolder}/java"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-GenerateAst<learn-interpreter_f3210d28>",
+      "request": "launch",
+      "mainClass": "com.craftinginterpreters.tool.GenerateAst",
+      "projectName": "learn-interpreter_f3210d28",
+      "args": "com/craftinginterpreters/lox",
+      "cwd": "${workspaceFolder}/java"
+    }
+  ]
+}

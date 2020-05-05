@@ -116,6 +116,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     environment.define(stmt.name.lexeme, null);    
     
+    // super is related to which class the method is declared
+    // this is related to which class the method is called
+    // but when method is extracted and insert into another instance
+    // it's no longer a method, but a field, so still related to where it's extracted
     if (stmt.superclass != null) {                     
       environment = new Environment(environment);      
       environment.define("super", superclass);         
@@ -144,9 +148,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     int distance = locals.get(expr);                  
     LoxClass superclass = (LoxClass)environment.getAt(
         distance, "super");
-    // "this" is always one level nearer than "super"'s environment.
-    LoxInstance object = (LoxInstance)environment.getAt(            
-        distance - 1, "this");
     LoxFunction method = superclass.findMethod(expr.method.lexeme);
 
     if (method == null) {                                          
@@ -154,6 +155,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
           "Undefined property '" + expr.method.lexeme + "'.");     
     } 
     
+    // "this" is always one level nearer than "super"'s environment.
+    LoxInstance object = (LoxInstance)environment.getAt(            
+        distance - 1, "this");
+    // "this" remains unchanged
     return method.bind(object);                        
   } 
 	

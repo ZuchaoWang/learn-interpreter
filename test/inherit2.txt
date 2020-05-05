@@ -1,0 +1,12 @@
+class A {
+  init() {
+    this.x = 1;
+  }
+  p() {
+    print this.x;
+  }
+}
+
+class B < A {}
+
+B().p();

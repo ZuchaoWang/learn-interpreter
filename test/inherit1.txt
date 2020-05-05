@@ -1,0 +1,18 @@
+class A {
+  p1() {print "A";}
+  p2() {this.p1();}
+}
+
+class B<A {
+  p1() {print "B";}
+  p2() {this.p1();}
+  p3() {super.p2();}
+}
+
+class C<B {
+  p1() {print "C";}
+}
+
+C().p3();
+// will print C, because this will always be C
+// call(C,C.p3) => call(C,B.super.p2) => call(C,C.p1)

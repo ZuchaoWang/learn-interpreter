@@ -11,11 +11,13 @@ class LoxInstance {
     this.klass = klass;              
   }
   
-  Object get(Token name) {                           
+  Object get(Token name) {    
+    // fields assigned from other classes' methods will not bind                       
     if (fields.containsKey(name.lexeme)) {           
       return fields.get(name.lexeme);                
     }
 
+    // only methods defined within the class or its superclass will be bound
     LoxFunction method = klass.findMethod(name.lexeme);
     if (method != null) return method.bind(this); 
 

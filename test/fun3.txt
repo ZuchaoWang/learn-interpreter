@@ -1,0 +1,29 @@
+// functions in global scope are allowed to refer to variables/functions defined later
+// functions in loval scopes are not allowed
+
+fun parentA(n) {
+  print n;
+  if (n>1) parentB(n-1);
+}
+
+fun parentB(n) {
+  print n;
+  if (n>1) parentA(n-1);
+}
+
+{
+  fun childA(n) {
+    print n;
+    if (n>1) childB(n-1);
+    // childB is resolved to be in global scope
+    // therefore will be undefined when executed
+  }
+
+  fun childB(n) {
+    print n;
+    if (n>1) childA(n-1);
+  }
+
+  parentA(4);
+  childA(4);
+}

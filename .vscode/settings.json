@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "atomic": "c",
+    "locale": "c",
+    "istream": "c",
+    "streambuf": "c"
+  }
+}

@@ -23,7 +23,8 @@ struct sObj {
 struct sObjString {
   Obj obj;         
   int length;      
-  char* chars;     
+  char* chars;
+  uint32_t hash;     
 };
 
 ObjString* takeString(char* chars, int length);

@@ -3,6 +3,12 @@
     "atomic": "c",
     "locale": "c",
     "istream": "c",
-    "streambuf": "c"
+    "streambuf": "c",
+    "array": "c",
+    "functional": "c",
+    "ostream": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c"
   }
 }

@@ -293,6 +293,8 @@ static void parsePrecedence(Precedence precedence) {
   bool canAssign = precedence <= PREC_ASSIGNMENT;                 
   prefixRule(canAssign);
 
+  // although TOKEN_EQUAL means assignment, its precedence is PREC_NONE not PREC_ASSIGNMENT
+  // so a+b=10 will exit loop at =
   while (precedence <= getRule(parser.current.type)->precedence) {
     advance();                                                    
     ParseFn infixRule = getRule(parser.previous.type)->infix;     
@@ -302,7 +304,7 @@ static void parsePrecedence(Precedence precedence) {
   // TOKEN_EQUAL can only be consumed within namedVariable
   // if it leaks here, it is an error
   // canAssign seem to make sure it errors only at outer assignment layer
-  // so maybe a.b.c = 30 will not error at b.c = 30 ? need to see it later
+  // so a+b=10 will error after a+b is parsed, not after b is parsed
   if (canAssign && match(TOKEN_EQUAL)) {                          
     error("Invalid assignment target.");                          
   }                                

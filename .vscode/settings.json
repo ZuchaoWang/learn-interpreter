@@ -9,6 +9,13 @@
     "ostream": "c",
     "tuple": "c",
     "type_traits": "c",
-    "utility": "c"
+    "utility": "c",
+    "*.tcc": "c",
+    "exception": "c",
+    "optional": "c",
+    "algorithm": "c",
+    "fstream": "c",
+    "initializer_list": "c",
+    "numeric": "c"
   }
 }

@@ -1,15 +1,26 @@
 #ifndef clox_vm_h 
 #define clox_vm_h 
 
-#include "chunk.h"
+#include "object.h"
 #include "table.h"
 #include "value.h"
 
-#define STACK_MAX 256
+#define FRAMES_MAX 64                       
+#define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
+
+typedef struct {        
+  ObjFunction* function;
+  // ip starts from function->chunk->code
+  uint8_t* ip;
+  // slots is the part of the vm.stack relavant to the function
+  // it begins with the function itself OBJ_VAL(function)  
+  Value* slots;
+} CallFrame;
 
 typedef struct {  
-  Chunk* chunk;
-  uint8_t* ip;
+  CallFrame frames[FRAMES_MAX];
+  int frameCount;
+
   Value stack[STACK_MAX];
   Value* stackTop;
   Table globals;

@@ -10,9 +10,9 @@
 
 typedef struct {        
   ObjFunction* function;
-  // ip starts from function->chunk->code
+  // cpu: ip starts from function->chunk->code
   uint8_t* ip;
-  // slots is the part of the vm.stack relavant to the function
+  // memory: slots is the part of the vm.stack relavant to the function
   // it begins with the function itself OBJ_VAL(function)  
   Value* slots;
 } CallFrame;

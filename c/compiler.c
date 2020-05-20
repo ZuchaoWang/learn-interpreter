@@ -384,7 +384,8 @@ static void binary(bool canAssign) {
   }                                                        
 }
 
-static void call(bool canAssign) {  
+static void call(bool canAssign) {
+  // in compile time, call doesn't care whether it's lox or native function 
   uint8_t argCount = argumentList();
   emitBytes(OP_CALL, argCount);     
 }
@@ -632,7 +633,7 @@ static void returnStatement() {
   if (current->type == TYPE_SCRIPT) {           
     error("Cannot return from top-level code.");
   }
-                                  
+
   if (match(TOKEN_SEMICOLON)) {                                
     emitReturn();                                              
   } else {                                                     

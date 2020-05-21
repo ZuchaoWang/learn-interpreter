@@ -8,8 +8,9 @@
 #define FRAMES_MAX 64                       
 #define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
-typedef struct {        
-  ObjFunction* function;
+typedef struct {
+  // contains the function and its execution environment      
+  ObjClosure* closure;
   // cpu: ip starts from function->chunk->code
   uint8_t* ip;
   // memory: slots is the part of the vm.stack relavant to the function

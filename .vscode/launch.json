@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/c/lox",
-      "args": ["${workspaceFolder}/test/fun1.txt"],
+      "args": ["${workspaceFolder}/test/resolve6.txt"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

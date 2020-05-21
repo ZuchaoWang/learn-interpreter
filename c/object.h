@@ -35,7 +35,8 @@ struct sObj {
 // therefore following the toplevel script we can reach all functions
 typedef struct {    
   Obj obj;          
-  int arity;        
+  int arity;
+  int upvalueCount;        
   Chunk chunk;
   ObjString* name;  
 } ObjFunction;

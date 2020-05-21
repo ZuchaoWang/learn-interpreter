@@ -153,6 +153,10 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
+#ifdef DEBUG_TRACE_EXECUTION
+  printf("== <execute script> ==\n");
+#endif 
+
   CallFrame* frame = &vm.frames[vm.frameCount - 1];
 
 #define READ_BYTE() (*frame->ip++)

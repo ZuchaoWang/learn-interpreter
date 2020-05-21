@@ -6,6 +6,11 @@ fun outer() {
     print x;
   }
 
-  inner();
+  return inner;
 }
-outer();
+var closure = outer();
+fun another() {
+  var x = "another";
+}
+another();
+closure();

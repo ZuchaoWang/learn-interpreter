@@ -9,3 +9,7 @@ fun outer() {
     }
   }
 }
+
+// representing upvalue a
+// inner: (0, upvalue)
+// middle: (1, local)

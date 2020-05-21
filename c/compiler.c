@@ -261,17 +261,19 @@ static int addUpvalue(Compiler* compiler, uint8_t index, bool isLocal) {
 
   compiler->upvalues[upvalueCount].isLocal = isLocal;                   
   compiler->upvalues[upvalueCount].index = index;                       
-  return compiler->function->upvalueCount++;                            
+  return compiler->function->upvalueCount++; // the only place upvalueCount get modified
 }
 
 static int resolveUpvalue(Compiler* compiler, Token* name) {
   if (compiler->enclosing == NULL) return -1;
 
+  // local starts from index 1, because index 0 is the function itself
   int local = resolveLocal(compiler->enclosing, name);      
   if (local != -1) {                                        
     return addUpvalue(compiler, (uint8_t)local, true);      
   }
 
+  // upValue starts from index 0
   int upvalue = resolveUpvalue(compiler->enclosing, name);
   if (upvalue != -1) {                                    
     return addUpvalue(compiler, (uint8_t)upvalue, false); 

@@ -1,0 +1,10 @@
+var a = 1;
+var c;
+{
+  var b = 2;
+  fun inner() {
+    print b;
+  }
+  c = inner;
+}
+c();

@@ -10,7 +10,9 @@
 #define ALLOCATE_OBJ(type, objectType) \
     (type*)allocateObject(sizeof(type), objectType)
 
-static Obj* allocateObject(size_t size, ObjType type) {    
+static Obj* allocateObject(size_t size, ObjType type) {
+  // all kinds of obj are allocated on the heap
+  // so they will stay active until freeObject is called    
   Obj* object = (Obj*)reallocate(NULL, 0, size);           
   object->type = type;
 
@@ -103,7 +105,9 @@ ObjString* copyString(const char* chars, int length) {
 
 ObjUpvalue* newUpvalue(Value* slot) {                         
   ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
-  upvalue->location = slot;                                   
+  upvalue->closed = NIL_VAL;
+  upvalue->location = slot;
+  upvalue->next = NULL;
   return upvalue;                                             
 }
 

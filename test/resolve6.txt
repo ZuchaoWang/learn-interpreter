@@ -7,8 +7,12 @@ fun outer() {
     fun inner() {
       print a + c + b + d;
     }
+    return inner;
   }
+  return middle;
 }
+
+outer()()();
 
 // representing upvalue a
 // inner: (0, upvalue)

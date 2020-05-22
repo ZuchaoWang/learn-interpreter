@@ -19,7 +19,8 @@ static Value clockNative(int argCount, Value* args) {
 
 static void resetStack() {
   vm.stackTop = vm.stack;
-  vm.frameCount = 0;  
+  vm.frameCount = 0;
+  vm.openUpvalues = NULL;
 }
 
 static void runtimeError(const char* format, ...) {
@@ -135,8 +136,42 @@ static bool callValue(Value callee, int argCount) {
 }
 
 static ObjUpvalue* captureUpvalue(Value* local) {
+  ObjUpvalue* prevUpvalue = NULL;                                   
+  ObjUpvalue* upvalue = vm.openUpvalues;
+
+  while (upvalue != NULL && upvalue->location > local) {            
+    prevUpvalue = upvalue;                                          
+    upvalue = upvalue->next;                                        
+  }
+
+  // reuse existing upvalue
+  if (upvalue != NULL && upvalue->location == local) return upvalue;
+
   ObjUpvalue* createdUpvalue = newUpvalue(local);
+  createdUpvalue->next = upvalue;
+
+  // captureUpvalue is called when inner function closure get defined
+  // at this time inner function is not executed, it's the outer function executing
+  // captured upvalues will be open and appended to vm.openUpvalues
+  // then when outer function returned, they will be closed via closeUpValues
+  if (prevUpvalue == NULL) {                     
+    vm.openUpvalues = createdUpvalue;            
+  } else {                                       
+    prevUpvalue->next = createdUpvalue;          
+  }
+
   return createdUpvalue;                         
+}
+
+static void closeUpvalues(Value* last) {
+  // this moves upvalues from stack to heap  
+  while (vm.openUpvalues != NULL &&          
+         vm.openUpvalues->location >= last) {
+    ObjUpvalue* upvalue = vm.openUpvalues;   
+    upvalue->closed = *upvalue->location;    
+    upvalue->location = &upvalue->closed;    
+    vm.openUpvalues = upvalue->next;         
+  }                                          
 }
 
 static bool isFalsey(Value value) {                           
@@ -318,20 +353,38 @@ static InterpretResult run() {
         ObjFunction* function = AS_FUNCTION(READ_CONSTANT());
         ObjClosure* closure = newClosure(function);          
         push(OBJ_VAL(closure));
+        // upvalues get captured when function closure is declared
         for (int i = 0; i < closure->upvalueCount; i++) {               
           uint8_t isLocal = READ_BYTE();                                
           uint8_t index = READ_BYTE();                                  
           if (isLocal) {                                                
             closure->upvalues[i] = captureUpvalue(frame->slots + index);
-          } else {                                                      
+          } else {     
+            // if the upvalue is a local variable of grand parent function
+            // it should already be captured when parent function get declared
+            // and it will be closed when grand parent function get returned
+            // so it's safe to just =        
             closure->upvalues[i] = frame->closure->upvalues[index];     
           }                                                             
         }                              
         break;                                               
-      } 
+      }
+      case OP_CLOSE_UPVALUE: {
+        // emitted from endScope, will be used for upvalues for loop and block
+        // it's doing similar things as the start of OP_RETURN
+        // except that we don't have the start of locals for this scope
+        // so we cannot just reassign vm.stackTop = frame->slots;
+        // we need to do it one step at a time, only at location vm.stackTop-1
+        closeUpvalues(vm.stackTop - 1);
+        pop();                         
+        break;
+      }
       case OP_RETURN: {
         Value result = pop();
-
+        // when inner function closure get declared
+        // related upvalues should already be appended to vm.openUpvalues
+        // and they should all be local variables of outer function, so we use frame->slots as last
+        closeUpvalues(frame->slots);
         vm.frameCount--;                      
         if (vm.frameCount == 0) {             
           pop();                              

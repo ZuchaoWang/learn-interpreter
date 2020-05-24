@@ -57,9 +57,26 @@ static void runFile(const char* path) {
 
   if (result == INTERPRET_COMPILE_ERROR) exit(65);
   if (result == INTERPRET_RUNTIME_ERROR) exit(70);
-}  
+}
+
+// static void printSizes() {
+//   printf("== <size start> ==\n");
+//   printf("ObjType: %lu\n", sizeof(ObjType));
+//   printf("bool: %lu\n", sizeof(bool));
+//   printf("Obj*: %lu\n", sizeof(Obj*));
+//   printf("Obj: %lu\n", sizeof(Obj));
+//   printf("int: %lu\n", sizeof(int));
+//   printf("uint32_t: %lu\n", sizeof(uint32_t));
+//   printf("char*: %lu\n", sizeof(char*));
+//   printf("ObjString: %lu\n", sizeof(ObjString));
+//   printf("ValueArray: %lu\n", sizeof(ValueArray));
+//   printf("Chunk: %lu\n", sizeof(Chunk));
+//   printf("ObjFunction: %lu\n", sizeof(ObjFunction));
+//   printf("== <size end> ==\n");
+// }
 
 int main(int argc, const char* argv[]) {
+  // printSizes();
   initVM();
 
   if (argc == 1) {                          

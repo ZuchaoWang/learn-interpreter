@@ -1,0 +1,3 @@
+var a = "he" + "llo " + "world";
+// the intermediate "hello " can be garbage collected
+var b = "haha " + "hihi";

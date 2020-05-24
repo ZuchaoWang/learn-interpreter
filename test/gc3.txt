@@ -1,0 +1,11 @@
+fun outer() {
+  fun inner() {
+    print "inner";
+  }
+  inner();
+}
+
+outer();
+// the closure of function inner can be garbage collected
+// but the function itself remains
+var a = "hello " + "world";

@@ -72,6 +72,8 @@ static void adjustCapacity(Table* table, int capacity) {
     table->count++;                              
   }
 
+  // freeing old table entries reduces vm.bytesAllocated
+  // but this is not part of gc, therefore not in gc log
   FREE_ARRAY(Entry, table->entries, table->capacity);
   table->entries = entries;                             
   table->capacity = capacity;                           
@@ -140,4 +142,21 @@ ObjString* tableFindString(Table* table, const char* chars, int length,
 
     index = (index + 1) % table->capacity;                             
   }                                                                    
+}
+
+void tableRemoveWhite(Table* table) {                     
+  for (int i = 0; i < table->capacity; i++) {             
+    Entry* entry = &table->entries[i];                    
+    if (entry->key != NULL && !entry->key->obj.isMarked) {
+      tableDelete(table, entry->key);                     
+    }                                                     
+  }                                                       
+}
+
+void markTable(Table* table) {               
+  for (int i = 0; i < table->capacity; i++) {
+    Entry* entry = &table->entries[i];       
+    markObject((Obj*)entry->key);            
+    markValue(entry->value);                 
+  }                                          
 }

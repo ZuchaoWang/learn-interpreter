@@ -15,9 +15,15 @@ static Obj* allocateObject(size_t size, ObjType type) {
   // so they will stay active until freeObject is called    
   Obj* object = (Obj*)reallocate(NULL, 0, size);           
   object->type = type;
+  object->isMarked = false;
 
   object->next = vm.objects;
-  vm.objects = object;                                     
+  vm.objects = object;
+
+#ifdef DEBUG_LOG_GC                                             
+  printf("%p allocate %ld for %d\n", (void*)object, size, type);
+#endif
+
   return object;                                           
 }
 
@@ -57,7 +63,11 @@ static ObjString* allocateString(char* chars, int length,
   string->chars = chars;
   string->hash = hash;
 
+  // this can be called during compile time
+  // so compiler will access vm.stack
+  push(OBJ_VAL(string));
   tableSet(&vm.strings, string, NIL_VAL);
+  pop();
 
   return string;                                           
 }
@@ -96,6 +106,11 @@ ObjString* copyString(const char* chars, int length) {
                                         hash);                     
   if (interned != NULL) return interned; 
 
+  // ALLOCATE will call reallocate, therefore
+  // memory of heapChar* also count in vm.bytesAllocated
+  // it just does not print log "%p allocate %ld for %d"
+  // also since it's not an obj, it will not be garbage collected directly
+  // it will only be collected as part of objString
   char* heapChars = ALLOCATE(char, length + 1);       
   memcpy(heapChars, chars, length);                   
   heapChars[length] = '\0';                           

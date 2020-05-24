@@ -50,7 +50,9 @@ static void runtimeError(const char* format, ...) {
 
 static void defineNative(const char* name, NativeFn function) {
   // push then pop for gc
-  push(OBJ_VAL(copyString(name, (int)strlen(name))));          
+  // after copyString, name is not referenced by the function, so will not be marked via function
+  // to solve that, we push it onto the stack, so that it get marked via stack
+  push(OBJ_VAL(copyString(name, (int)strlen(name))));
   push(OBJ_VAL(newNative(function)));                          
   tableSet(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);  
   pop();                                                       
@@ -65,6 +67,14 @@ static void defineNative(const char* name, NativeFn function) {
 void initVM() { 
   resetStack();
   vm.objects = NULL;
+
+  vm.bytesAllocated = 0;  
+  vm.nextGC = 1024 * 1024;
+
+  vm.grayCount = 0;      
+  vm.grayCapacity = 0;   
+  vm.grayStack = NULL;
+
   initTable(&vm.globals);
   initTable(&vm.strings);
 
@@ -179,8 +189,8 @@ static bool isFalsey(Value value) {
 }
 
 static void concatenate() {                      
-  ObjString* b = AS_STRING(pop());               
-  ObjString* a = AS_STRING(pop());
+  ObjString* b = AS_STRING(peek(0)); 
+  ObjString* a = AS_STRING(peek(1));
 
   int length = a->length + b->length;
   char* chars = ALLOCATE(char, length + 1);
@@ -188,7 +198,9 @@ static void concatenate() {
   memcpy(chars + a->length, b->chars, b->length);
   chars[length] = '\0';                          
 
-  ObjString* result = takeString(chars, length); 
+  ObjString* result = takeString(chars, length);
+  pop();                                        
+  pop(); 
   push(OBJ_VAL(result));                         
 }
 
@@ -411,6 +423,8 @@ InterpretResult interpret(const char* source) {
   ObjFunction* function = compile(source);             
   if (function == NULL) return INTERPRET_COMPILE_ERROR;
 
+  // current now point to NULL not function
+  // so nothing to track it, have to push to the stack
   push(OBJ_VAL(function));
   ObjClosure* closure = newClosure(function);          
   pop();                                               

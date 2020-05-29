@@ -74,7 +74,8 @@ typedef struct Compiler {
 
 typedef struct ClassCompiler {    
   struct ClassCompiler* enclosing;
-  Token name;                     
+  Token name;
+  bool hasSuperclass;                      
 } ClassCompiler;
 
 Parser parser;
@@ -546,6 +547,36 @@ static void variable(bool canAssign) {
   namedVariable(parser.previous, canAssign);
 }
 
+static Token syntheticToken(const char* text) {
+  Token token;                                 
+  token.start = text;                          
+  token.length = (int)strlen(text);            
+  return token;                                
+}
+
+static void super_(bool canAssign) {
+  if (currentClass == NULL) {                                  
+    error("Cannot use 'super' outside of a class.");           
+  } else if (!currentClass->hasSuperclass) {                   
+    error("Cannot use 'super' in a class with no superclass.");
+  }
+
+  consume(TOKEN_DOT, "Expect '.' after 'super'.");            
+  consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
+  uint8_t name = identifierConstant(&parser.previous);
+
+  namedVariable(syntheticToken("this"), false);       
+  if (match(TOKEN_LEFT_PAREN)) {                  
+    uint8_t argCount = argumentList();            
+    namedVariable(syntheticToken("super"), false);
+    emitBytes(OP_SUPER_INVOKE, name);             
+    emitByte(argCount);                           
+  } else {                                        
+    namedVariable(syntheticToken("super"), false);
+    emitBytes(OP_GET_SUPER, name);                
+  }        
+}
+
 static void this_(bool canAssign) {
   if (currentClass == NULL) {                      
     error("Cannot use 'this' outside of a class.");
@@ -603,7 +634,7 @@ ParseRule rules[] = {
   { NULL,     or_,     PREC_NONE },       // TOKEN_OR              
   { NULL,     NULL,    PREC_NONE },       // TOKEN_PRINT           
   { NULL,     NULL,    PREC_NONE },       // TOKEN_RETURN          
-  { NULL,     NULL,    PREC_NONE },       // TOKEN_SUPER           
+  { super_,   NULL,    PREC_NONE },       // TOKEN_SUPER           
   { this_,    NULL,    PREC_NONE },       // TOKEN_THIS            
   { literal,  NULL,    PREC_NONE },       // TOKEN_TRUE            
   { NULL,     NULL,    PREC_NONE },       // TOKEN_VAR             
@@ -712,9 +743,32 @@ static void classDeclaration() {
   defineVariable(nameConstant);
 
   ClassCompiler classCompiler;           
-  classCompiler.name = parser.previous;  
+  classCompiler.name = parser.previous;
+  classCompiler.hasSuperclass = false;  
   classCompiler.enclosing = currentClass;
-  currentClass = &classCompiler;                               
+  currentClass = &classCompiler; 
+
+  if (match(TOKEN_LESS)) {                               
+    consume(TOKEN_IDENTIFIER, "Expect superclass name.");
+    variable(false);
+    if (identifiersEqual(&className, &parser.previous)) {
+      error("A class cannot inherit from itself.");      
+    }
+
+    beginScope();                     
+    // "super" below is a constant string allocated in the DATA section of the C program
+    // it's not on the C stack, so won't get freed when this function returns
+    // so superclass is already on stackTop via last variable(false)
+    // so this addLocal register it in the locals array
+    addLocal(syntheticToken("super"));
+    // since "super" is a local variable, so defineVariable(*) can be any number, not limited to 0
+    // defineVariable must make the scopeDepth correct
+    defineVariable(0); 
+
+    namedVariable(className, false);                     
+    emitByte(OP_INHERIT);
+    classCompiler.hasSuperclass = true;                                
+  }                              
 
   namedVariable(className, false);
   consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
@@ -723,6 +777,10 @@ static void classDeclaration() {
   }
   consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
   emitByte(OP_POP);
+
+  if (classCompiler.hasSuperclass) {     
+    endScope();                          
+  }
 
   currentClass = currentClass->enclosing; 
 }

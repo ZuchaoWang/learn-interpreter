@@ -26,13 +26,13 @@ typedef struct {
   Value* stackTop;
   Table globals;
   Table strings;
-  ObjString* initString;
+  ObjString* initString; // constant string of "init", used everywhere for inheritance, so store it here
   ObjUpvalue* openUpvalues;
 
+  // gc related
   size_t bytesAllocated;   
   size_t nextGC;
-
-  Obj* objects;
+  Obj* objects; // linked-list of all objects to feed to gc
   int grayCount;   
   int grayCapacity;
   Obj** grayStack;   

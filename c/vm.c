@@ -50,8 +50,12 @@ static void runtimeError(const char* format, ...) {
 
 static void defineNative(const char* name, NativeFn function) {
   // push then pop for gc
-  // after copyString, name is not referenced by the function, so will not be marked via function
-  // to solve that, we push it onto the stack, so that it get marked via stack
+  // the c-string name itself is a string literal, which should always exists, and as it's not an obj, it will not go through gc
+  // but after using copyString, an objstring will be created, which wraps a copy of the c-string literal
+  // this objstring is not referenced by anything, only later will it be referenced by the function
+  // so it can be removed by gc when immediately newNative and tableGet try to allocate memory
+  // to ensure it not get removed, we push it onto the stack, so that it get marked via stack
+  // the same trick apply to the newly created ObjNative via newNative, which can be removed via tableGet, if not pushed onto the stack
   push(OBJ_VAL(copyString(name, (int)strlen(name))));
   push(OBJ_VAL(newNative(function)));                          
   tableSet(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);  

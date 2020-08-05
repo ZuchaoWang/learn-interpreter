@@ -17,6 +17,7 @@
     "fstream": "c",
     "initializer_list": "c",
     "numeric": "c",
-    "cmath": "cpp"
+    "cmath": "cpp",
+    "limits": "c"
   }
 }

@@ -87,7 +87,8 @@ bool tableSet(Table* table, ObjString* key, Value value) {
 
   Entry* entry = findEntry(table->entries, table->capacity, key);
 
-  bool isNewKey = entry->key == NULL;                            
+  bool isNewKey = entry->key == NULL;
+  // increate count when truly empty, not tombstone                            
   if (isNewKey && IS_NIL(entry->value)) table->count++;                                
 
   entry->key = key;                                              

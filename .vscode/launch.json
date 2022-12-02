@@ -9,12 +9,13 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/c/lox",
-      "args": ["${workspaceFolder}/test/gc2.txt"],
+      "args": ["${workspaceFolder}/test/fun0.txt"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,
-      "MIMode": "lldb"
+      "MIMode": "lldb",
+      "targetArchitecture": "x86_64"
     }
   ]
 }

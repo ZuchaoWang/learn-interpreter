@@ -17,6 +17,18 @@
     "fstream": "c",
     "initializer_list": "c",
     "numeric": "c",
-    "cmath": "cpp"
-  }
+    "cmath": "cpp",
+    "__locale": "c",
+    "__string": "c",
+    "concepts": "c",
+    "cstdlib": "c",
+    "memory_resource": "c",
+    "system_error": "c",
+    "typeinfo": "c",
+    "version": "c",
+    "iostream": "c",
+    "variant": "c",
+    "*.inc": "c"
+  },
+  "C_Cpp.loggingLevel": "Debug"
 }

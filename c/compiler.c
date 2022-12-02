@@ -213,7 +213,7 @@ static void patchJump(int offset) {
 static void initCompiler(Compiler* compiler, FunctionType type) {
   compiler->enclosing = current;
   
-  compiler->function = NULL;                                     
+  compiler->function = NULL; // set NULL then set to newFunction later, due to gc                          
   compiler->type = type;
   compiler->localCount = 0;                   
   compiler->scopeDepth = 0;
@@ -366,7 +366,7 @@ static uint8_t parseVariable(const char* errorMessage) {
 }
 
 static void markInitialized() {
-  if (current->scopeDepth == 0) return;                    
+  if (current->scopeDepth == 0) return; // useful only for funDeclaration
   current->locals[current->localCount - 1].depth =
       current->scopeDepth;                        
 }
@@ -535,6 +535,8 @@ static void namedVariable(Token name, bool canAssign) {
   }
 
   // maybe can avoid the canAssign mess by considering TOKEN_EQUAL as an infix operator
+  // maybe not, because we stil have to check left operand, and that need special treatment
+  // canAssign = false but next token is TOKEN_EQUAL, then won't consume TOKEN_EQUAL, will leak to parsePrecedence
   if (canAssign && match(TOKEN_EQUAL)) { 
     expression();                         
     emitBytes(setOp, (uint8_t)arg);        
@@ -709,7 +711,11 @@ static void function(FunctionType type) {
 
   // The body.                                                  
   consume(TOKEN_LEFT_BRACE, "Expect '{' before function body.");
-  block();                                                      
+  block();       
+
+  // no need to endScope because we no longer need to use current functions locals and scopeDepth
+  // for this function we only need to emit OP_RETURN, which has nothing to do with locals
+  // then by calling endCompiler we will set current compiler to parent compiler, we won't emit any bytecode to current function
 
   // Create the function object.                                
   ObjFunction* function = endCompiler();                        

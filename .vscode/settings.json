@@ -28,7 +28,7 @@
     "version": "c",
     "iostream": "c",
     "variant": "c",
-    "*.inc": "c"
-  },
-  "C_Cpp.loggingLevel": "Debug"
+    "*.inc": "c",
+    "limits": "c"
+  }
 }

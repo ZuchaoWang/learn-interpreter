@@ -53,13 +53,15 @@ typedef struct {
 
 typedef enum {  
   TYPE_FUNCTION,
-  TYPE_INITIALIZER,
-  TYPE_METHOD,
-  TYPE_SCRIPT   
+  TYPE_INITIALIZER, // class constructor
+  TYPE_METHOD,      // class method
+  TYPE_SCRIPT       // top level code
 } FunctionType; 
 
+// assigned to current
+// each compiler is repsonsible for exactly one function
 typedef struct Compiler {
-  struct Compiler* enclosing;
+  struct Compiler* enclosing; // pointer to parent function's compiler
 
   ObjFunction* function;    
   FunctionType type;
@@ -72,8 +74,12 @@ typedef struct Compiler {
   int scopeDepth;           
 } Compiler;
 
-typedef struct ClassCompiler {    
-  struct ClassCompiler* enclosing;
+// assigned to currentClass
+// each classCompiler is repsonsible for exactly one class
+// to remember whether inside a class (so "this" makes sense)
+// and whether hasSuperClass (so "super" makes sense)
+typedef struct ClassCompiler {
+  struct ClassCompiler* enclosing; // support nesting class declaration, not to be confused with inheritance
   Token name;
   bool hasSuperclass;                      
 } ClassCompiler;
@@ -231,8 +237,9 @@ static void initCompiler(Compiler* compiler, FunctionType type) {
   local->depth = 0;
   local->isCaptured = false;
   if (type != TYPE_FUNCTION) {
-    // it seems that TYPE_SCRIPT incorrectly allows this
-    // but it's actually disabled via compilingClass 
+    // it seems that TYPE_SCRIPT incorrectly allows "this" and will return slot-0
+    // but it's actually disabled via compilingClass in this_ function
+    // because when type is TYPE_SCRIPT, currentClass must be NULL, then any usage of "this" lead to error
     local->name.start = "this";
     local->name.length = 4;    
   } else {                     
